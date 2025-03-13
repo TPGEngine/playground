@@ -1,11 +1,10 @@
-
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { getEnvironmentById, Environment } from '@/data/environments';
-import { useToast } from '@/components/ui/use-toast';
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getEnvironmentById, Environment } from "@/data/environments";
+import { useToast } from "@/components/ui/use-toast";
 
 const EnvironmentDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,34 +16,45 @@ const EnvironmentDetail = () => {
   useEffect(() => {
     // Scroll to top when component mounts
     window.scrollTo(0, 0);
-    
+
     if (id) {
       const envId = parseInt(id);
       const env = getEnvironmentById(envId);
-      
+
       if (env) {
         setEnvironment(env);
       } else {
         // Environment not found, redirect to home
-        navigate('/');
+        navigate("/");
         toast({
           title: "Environment not found",
           description: "The requested environment could not be found.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     }
-    
+
     setLoading(false);
   }, [id, navigate, toast]);
 
-  const handleEvolvePolicy = () => {
+  const handleEvolvePolicy = async (): Promise<void> => {
     toast({
       title: "Starting evolution",
       description: `Beginning policy evolution for ${environment?.name}...`,
     });
-    // Navigate to the policy evolution page
-    navigate(`/evolution/${id}`);
+
+    // Call the evolve API endpoint
+    const response = await fetch("http://localhost:8000/experiments/evolve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+    const { seed, pid } = data;
+
+    navigate(`/evolution/${String(seed) + String(pid)}`);
   };
 
   if (loading) {
@@ -70,18 +80,18 @@ const EnvironmentDetail = () => {
       <div className="max-w-7xl mx-auto">
         {/* Back button */}
         <div className="mb-8">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Environments</span>
           </Button>
         </div>
-        
+
         {/* Environment title */}
-        <motion.h1 
+        <motion.h1
           className="text-3xl md:text-4xl font-bold mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -89,9 +99,9 @@ const EnvironmentDetail = () => {
         >
           MuJoCo {environment.name}
         </motion.h1>
-        
+
         {/* Environment preview */}
-        <motion.div 
+        <motion.div
           className="aspect-video bg-gray-100 rounded-xl overflow-hidden mb-12 max-w-3xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,7 +113,7 @@ const EnvironmentDetail = () => {
             className="w-full h-full object-cover"
           />
         </motion.div>
-        
+
         {/* Description section */}
         <motion.div
           className="mb-12 max-w-3xl"
@@ -115,21 +125,21 @@ const EnvironmentDetail = () => {
           <p className="text-gray-700 leading-relaxed">
             {environment.description}
           </p>
-          
+
           <div className="mt-6">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
               Complexity: {environment.complexity}
             </span>
           </div>
         </motion.div>
-        
+
         {/* CTA button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <Button 
+          <Button
             className="px-8 py-6 rounded-md text-lg bg-tpg-blue hover:bg-tpg-blue/90 flex items-center gap-2"
             onClick={handleEvolvePolicy}
           >
