@@ -156,6 +156,27 @@ const PolicyEvolution = () => {
     });
   };
 
+  const handleBack = async () => {
+    // Get the experiment from the database
+    const experiment = await db.experiments
+      .where("id")
+      .equals(experimentId)
+      .first();
+
+    if (!experiment) {
+      navigate("/");
+      toast({
+        title: "Experiment not found",
+        description: "The requested experiment could not be found.",
+        variant: "destructive",
+      });
+      return;
+    } else {
+      console.log(`Navigating back to environment: ${experiment.envId}`);
+      navigate(`/environment/${experiment.envId}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -182,7 +203,7 @@ const PolicyEvolution = () => {
           <Button
             variant="ghost"
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            onClick={() => navigate(`/environment/${experimentId}`)}
+            onClick={() => handleBack()}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back to Environment</span>

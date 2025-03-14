@@ -41,11 +41,6 @@ const EnvironmentDetail = () => {
   const handleEvolvePolicy = async (): Promise<void> => {
     if (!environment) return;
 
-    toast({
-      title: "Starting evolution",
-      description: `Beginning policy evolution for ${environment.name}...`,
-    });
-
     try {
       // Generate a UUID for the experiment
       const experimentId = crypto.randomUUID();
@@ -112,16 +107,18 @@ const EnvironmentDetail = () => {
 
         {/* Environment preview */}
         <motion.div
-          className="aspect-video bg-gray-100 rounded-xl overflow-hidden mb-12 max-w-3xl"
+          className="flex justify-center items-center mb-12 w-50 h-50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <img
-            src={environment.image}
-            alt={environment.name}
-            className="w-full h-full object-cover"
-          />
+          <div className="rounded-xl overflow-hidden mx-auto max-w-52 w-full">
+            <img
+              src={environment.image}
+              alt={environment.name}
+              className="w-full h-auto object-contain"
+            />
+          </div>
         </motion.div>
 
         {/* Description section */}
