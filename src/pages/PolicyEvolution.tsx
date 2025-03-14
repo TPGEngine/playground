@@ -13,9 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Environment, getEnvironmentById } from "@/data/environments";
 import { useToast } from "@/components/ui/use-toast";
+import { useMutation } from "@tanstack/react-query";
 import LogPanel from "@/components/LogPanel";
 import VisualizationPanel from "@/components/VisualizationPanel";
 import { db } from "@/data/db";
+import { evolvePolicy } from "@/api";
 
 const PolicyEvolution = () => {
   const { id: experimentId } = useParams<{ id: string }>();
@@ -28,6 +30,46 @@ const PolicyEvolution = () => {
   const [logs, setLogs] = useState<
     { generation: number; fitness: number; timestamp: string }[]
   >([]);
+
+  // Evolution mutation
+  const evolveMutation = useMutation({
+    mutationFn: evolvePolicy,
+    onSuccess: async (data) => {
+      try {
+        // Update the experiment in the database with seed and pid
+        await db.experiments.where("id").equals(experimentId!).modify({
+          seed: data.seed,
+          pid: data.pid,
+        });
+
+        setIsEvolving(true);
+        // Add initial log entry
+        const timestamp = new Date().toISOString();
+        setLogs((prev) => [...prev, { generation: 0, fitness: 0, timestamp }]);
+        toast({
+          title: "Evolution started",
+          description: `Starting evolution for ${environment?.name} (PID: ${data.pid}, Seed: ${data.seed})`,
+        });
+      } catch (error) {
+        console.error("Error updating experiment:", error);
+        toast({
+          title: "Warning",
+          description:
+            "Evolution started but failed to save experiment details.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error) => {
+      setIsEvolving(false);
+      toast({
+        title: "Evolution failed",
+        description: "Failed to start the evolution process. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Evolution error:", error);
+    },
+  });
 
   useEffect(() => {
     // Scroll to top when component mounts
@@ -90,14 +132,18 @@ const PolicyEvolution = () => {
     loadExperiment();
   }, [experimentId, navigate, toast]);
 
-  const handleToggleEvolution = () => {
-    setIsEvolving((prev) => !prev);
-    toast({
-      title: isEvolving ? "Evolution paused" : "Evolution started",
-      description: isEvolving
-        ? `Paused evolution for ${environment?.name}`
-        : `Starting evolution for ${environment?.name}`,
-    });
+  const handleToggleEvolution = async () => {
+    if (isEvolving) {
+      // Handle stopping evolution here (we'll implement this later)
+      setIsEvolving(false);
+      toast({
+        title: "Evolution paused",
+        description: `Paused evolution for ${environment?.name}`,
+      });
+    } else {
+      // Start evolution
+      evolveMutation.mutate();
+    }
   };
 
   const handleReset = () => {
@@ -159,19 +205,29 @@ const PolicyEvolution = () => {
             variant={isEvolving ? "outline" : "default"}
             className="flex items-center gap-2"
             onClick={handleToggleEvolution}
+            disabled={evolveMutation.isPending}
           >
-            {isEvolving ? (
+            {evolveMutation.isPending ? (
+              <div className="h-4 w-4 border-2 border-t-white border-white/30 rounded-full animate-spin" />
+            ) : isEvolving ? (
               <Pause className="h-4 w-4" />
             ) : (
               <Play className="h-4 w-4" />
             )}
-            <span>{isEvolving ? "Pause Evolution" : "Start Evolution"}</span>
+            <span>
+              {evolveMutation.isPending
+                ? "Starting Evolution..."
+                : isEvolving
+                ? "Pause Evolution"
+                : "Start Evolution"}
+            </span>
           </Button>
 
           <Button
             variant="outline"
             className="flex items-center gap-2"
             onClick={handleReset}
+            disabled={evolveMutation.isPending || isEvolving}
           >
             <RefreshCw className="h-4 w-4" />
             <span>Reset</span>
