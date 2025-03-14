@@ -5,6 +5,7 @@ import { ArrowLeft, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getEnvironmentById, Environment } from "@/data/environments";
 import { useToast } from "@/components/ui/use-toast";
+import { db } from "@/data/db";
 
 const EnvironmentDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,23 +39,32 @@ const EnvironmentDetail = () => {
   }, [id, navigate, toast]);
 
   const handleEvolvePolicy = async (): Promise<void> => {
+    if (!environment) return;
+
     toast({
       title: "Starting evolution",
-      description: `Beginning policy evolution for ${environment?.name}...`,
+      description: `Beginning policy evolution for ${environment.name}...`,
     });
 
-    // Call the evolve API endpoint
-    const response = await fetch("http://localhost:8000/experiments/evolve", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    try {
+      // Generate a UUID for the experiment
+      const experimentId = crypto.randomUUID();
 
-    const data = await response.json();
-    const { seed, pid } = data;
+      // Add the experiment to the database with the UUID
+      await db.experiments.add({
+        id: experimentId,
+        envId: parseInt(id!), // Convert string ID to number and ensure it exists
+      });
 
-    navigate(`/evolution/${String(seed) + String(pid)}`);
+      // Navigate to the evolution page with the UUID
+      navigate(`/evolution/${experimentId}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create experiment",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
