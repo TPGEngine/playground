@@ -15,9 +15,8 @@ export default function useWebRTC() {
     // When a local ICE candidate is generated, send it over the signaling channel.
     peer.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log("Local ICE candidate:", event.candidate);
         signalingService.sendMessage({
-          type: "ice",
+          type: "ice-candidate",
           // Convert candidate to RTCIceCandidateInit before sending.
           candidate: event.candidate.toJSON(),
         });
@@ -39,23 +38,6 @@ export default function useWebRTC() {
       }
     };
 
-    // Optional: trigger negotiation if you require the browser to initiate.
-    // (If your backend sends an offer, this may not be needed.)
-    peer.onnegotiationneeded = async () => {
-      try {
-        console.log("Negotiation needed event triggered");
-        const offer = await peer.createOffer();
-        await peer.setLocalDescription(offer);
-        // Build the message using a proper RTCSessionDescriptionInit object.
-        signalingService.sendMessage({
-          type: "offer",
-          sdp: peer.localDescription?.sdp,
-        });
-      } catch (error) {
-        console.error("Error during negotiation:", error);
-      }
-    };
-
     setPc(peer);
 
     return () => {
@@ -67,8 +49,6 @@ export default function useWebRTC() {
   useEffect(() => {
     const messageHandler = async (message: SignalingMessage) => {
       if (!pc) return;
-
-      console.log("useWebRTC received message:", message);
 
       if (message.type === "offer" && message.sdp) {
         try {
@@ -97,7 +77,7 @@ export default function useWebRTC() {
         } catch (error) {
           console.error("Error handling answer:", error);
         }
-      } else if (message.type === "ice" && message.candidate) {
+      } else if (message.type === "ice-candidate" && message.candidate) {
         try {
           // Ensure that the candidate conforms to RTCIceCandidateInit.
           await pc.addIceCandidate(new RTCIceCandidate(message.candidate));
@@ -112,6 +92,5 @@ export default function useWebRTC() {
       signalingService.removeMessageHandler(messageHandler);
     };
   }, [pc]);
-
   return { remoteStream, pc };
 }

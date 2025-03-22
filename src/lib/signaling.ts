@@ -2,6 +2,7 @@
 
 export interface SignalingMessage {
   type: string;
+  id?: string;
   payload?: any;
   candidate?: RTCIceCandidateInit;
   sdp?: string;
@@ -24,6 +25,12 @@ class SignalingService {
     this.socket = new WebSocket(this.url);
 
     this.socket.onopen = () => {
+      try {
+        const message: SignalingMessage = { type: "register", id: "client1" };
+        this.sendMessage(message);
+      } catch (error) {
+        console.error("Error during negotiation:", error);
+      }
       console.info("WebSocket connection open");
     };
 
@@ -49,6 +56,7 @@ class SignalingService {
 
   public sendMessage(message: SignalingMessage): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      message.id = "client1";
       this.socket.send(JSON.stringify(message));
     } else {
       console.warn("WebSocket is not open. Message not sent:", message);
