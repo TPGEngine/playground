@@ -52,7 +52,7 @@ export default function useWebRTC() {
 
       if (message.type === "offer" && message.sdp) {
         try {
-          // Create a valid RTCSessionDescriptionInit object by casting type accordingly.
+          // Create a valid RTCSessionDescriptionInit object.
           const remoteDesc = new RTCSessionDescription({
             type: message.type as RTCSdpType, // 'offer'
             sdp: message.sdp,
@@ -79,8 +79,20 @@ export default function useWebRTC() {
         }
       } else if (message.type === "ice-candidate" && message.candidate) {
         try {
-          // Ensure that the candidate conforms to RTCIceCandidateInit.
-          await pc.addIceCandidate(new RTCIceCandidate(message.candidate));
+          // The candidate might be sent as a string (from simulation) or as an object.
+          let candidateInit: RTCIceCandidateInit;
+          if (typeof message.candidate === "string") {
+            candidateInit = {
+              candidate: message.candidate,
+              sdpMid: message.sdpMid || "video0",
+              sdpMLineIndex:
+                message.sdpMLineIndex !== undefined ? message.sdpMLineIndex : 0,
+            };
+          } else {
+            candidateInit = message.candidate;
+          }
+          console.log("Received ICE candidate:", candidateInit);
+          await pc.addIceCandidate(new RTCIceCandidate(candidateInit));
         } catch (error) {
           console.error("Error adding ICE candidate:", error);
         }
@@ -92,5 +104,6 @@ export default function useWebRTC() {
       signalingService.removeMessageHandler(messageHandler);
     };
   }, [pc]);
+
   return { remoteStream, pc };
 }

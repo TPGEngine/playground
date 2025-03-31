@@ -4,8 +4,10 @@ export interface SignalingMessage {
   type: string;
   id?: string;
   payload?: any;
-  candidate?: RTCIceCandidateInit;
+  candidate?: string | RTCIceCandidateInit;
   sdp?: string;
+  sdpMid?: string;
+  sdpMLineIndex?: number;
 }
 
 class SignalingService {
