@@ -3,17 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useWebRTC, useWebSocket } from "@/hooks";
 
-interface VisualizationPanelProps {
-  environmentName: string;
-  generation: number;
-  isActive: boolean;
-}
-
-const VisualizationPanel: React.FC<VisualizationPanelProps> = ({
-  environmentName,
-  generation,
-  isActive: propIsActive,
-}) => {
+const VisualizationPanel: React.FC = ({}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { remoteStream, pc, isReconnecting } = useWebRTC();
   const { sendMessage } = useWebSocket();
@@ -144,32 +134,9 @@ const VisualizationPanel: React.FC<VisualizationPanelProps> = ({
     }
   }, []);
 
-  const handleTestMessage = () => {
-    // For testing purposes, send a test message over signaling.
-    sendMessage({ type: "test", payload: "Hello from React TS" });
-  };
-
   return (
     <div className="w-full h-[400px] bg-gray-50 rounded-lg overflow-hidden flex items-center justify-center">
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <div className="text-lg font-medium mb-4">
-          {environmentName} - Generation {generation}
-        </div>
-        <div className="text-sm mb-2">
-          Connection State:{" "}
-          <span
-            className={`font-medium ${
-              connectionState === "connected"
-                ? "text-green-600"
-                : "text-yellow-600"
-            }`}
-          >
-            {connectionState}
-          </span>
-          {isReconnecting && (
-            <span className="ml-2 text-blue-500">(Reconnecting...)</span>
-          )}
-        </div>
         {/* Video element is always rendered but may be hidden by CSS when inactive */}
         <video
           ref={videoRef}
@@ -189,19 +156,8 @@ const VisualizationPanel: React.FC<VisualizationPanelProps> = ({
             <div className="text-gray-400 mb-4">
               Waiting for video stream...
             </div>
-            <div className="text-sm text-gray-500">
-              {isReconnecting
-                ? "Reconnecting..."
-                : "Establishing connection..."}
-            </div>
           </motion.div>
         )}
-        <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={handleTestMessage}
-        >
-          Send Test Message
-        </button>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   RefreshCw,
   List,
   Activity,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import LogPanel from "@/components/LogPanel";
 import VisualizationPanel from "@/components/VisualizationPanel";
 import { db } from "@/data/db";
-import { evolvePolicy } from "@/api";
+import { evolvePolicy, replayBestAgent } from "@/api";
 
 const PolicyEvolution = () => {
   const { id: experimentId } = useParams<{ id: string }>();
@@ -26,10 +27,7 @@ const PolicyEvolution = () => {
   const [environment, setEnvironment] = useState<Environment | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEvolving, setIsEvolving] = useState(false);
-  const [generation, setGeneration] = useState(0);
-  const [logs, setLogs] = useState<
-    { generation: number; fitness: number; timestamp: string }[]
-  >([]);
+  const [isReplaying, setIsReplaying] = useState(false);
 
   // Evolution mutation
   const evolveMutation = useMutation({
@@ -45,7 +43,6 @@ const PolicyEvolution = () => {
         setIsEvolving(true);
         // Add initial log entry
         const timestamp = new Date().toISOString();
-        setLogs((prev) => [...prev, { generation: 0, fitness: 0, timestamp }]);
         toast({
           title: "Evolution started",
           description: `Starting evolution for ${environment?.name} (PID: ${data.pid}, Seed: ${data.seed})`,
@@ -68,6 +65,23 @@ const PolicyEvolution = () => {
         variant: "destructive",
       });
       console.error("Evolution error:", error);
+    },
+  });
+
+  // Replay mutation
+  const replayMutation = useMutation({
+    mutationFn: () => replayBestAgent(experimentId!),
+    onSuccess: () => {
+      setIsReplaying(false);
+    },
+    onError: (error) => {
+      setIsReplaying(false);
+      toast({
+        title: "Replay failed",
+        description: "Failed to start the replay process. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Replay error:", error);
     },
   });
 
@@ -147,13 +161,20 @@ const PolicyEvolution = () => {
   };
 
   const handleReset = () => {
-    setGeneration(0);
-    setLogs([]);
     setIsEvolving(false);
+    setIsReplaying(false);
     toast({
       title: "Evolution reset",
       description: `Reset evolution for ${environment?.name}`,
     });
+  };
+
+  const handleReplay = async () => {
+    toast({
+      title: "Replay started",
+      description: `Starting replay for ${environment?.name}`,
+    });
+    replayMutation.mutate();
   };
 
   const handleBack = async () => {
@@ -226,7 +247,11 @@ const PolicyEvolution = () => {
             variant={isEvolving ? "outline" : "default"}
             className="flex items-center gap-2"
             onClick={handleToggleEvolution}
-            disabled={evolveMutation.isPending}
+            disabled={
+              evolveMutation.isPending ||
+              isReplaying ||
+              replayMutation.isPending
+            }
           >
             {evolveMutation.isPending ? (
               <div className="h-4 w-4 border-2 border-t-white border-white/30 rounded-full animate-spin" />
@@ -245,24 +270,32 @@ const PolicyEvolution = () => {
           </Button>
 
           <Button
+            variant="default"
+            className="flex items-center gap-2"
+            onClick={handleReplay}
+            disabled={
+              replayMutation.isPending ||
+              evolveMutation.isPending ||
+              isEvolving ||
+              isReplaying
+            }
+          >
+            <Video className="h-4 w-4" />
+            <span>Replay Best Agent</span>
+          </Button>
+
+          <Button
             variant="outline"
             className="flex items-center gap-2"
             onClick={handleReset}
-            disabled={evolveMutation.isPending || isEvolving}
+            disabled={evolveMutation.isPending || isEvolving || isReplaying}
           >
             <RefreshCw className="h-4 w-4" />
             <span>Reset</span>
           </Button>
         </div>
 
-        {/* Generation counter */}
         <div className="mb-8">
-          <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-tpg-blue" />
-            <span className="text-lg font-medium">
-              Current Generation: {generation}
-            </span>
-          </div>
           {isEvolving && (
             <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -271,18 +304,7 @@ const PolicyEvolution = () => {
           )}
         </div>
 
-        {/* Two-panel layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Logs panel */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-2 mb-4">
-              <List className="h-5 w-5 text-gray-700" />
-              <h2 className="text-xl font-semibold">Evolution Logs</h2>
-            </div>
-            <Separator className="mb-4" />
-            <LogPanel logs={logs} />
-          </div>
-
+        <div className="grid grid-cols-1 max-w-[50%] mx-auto">
           {/* Visualization panel */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-4">
@@ -290,11 +312,7 @@ const PolicyEvolution = () => {
               <h2 className="text-xl font-semibold">Agent Visualization</h2>
             </div>
             <Separator className="mb-4" />
-            <VisualizationPanel
-              environmentName={environment.name}
-              generation={generation}
-              isActive={isEvolving}
-            />
+            <VisualizationPanel />
           </div>
         </div>
       </div>
