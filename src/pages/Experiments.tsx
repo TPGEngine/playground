@@ -24,7 +24,13 @@ const Experiments = () => {
     const fetchExperiments = async () => {
       try {
         const allExperiments = await db.experiments.toArray();
-        setExperiments(allExperiments);
+        // Sort experiments by createdAt in descending order (newest first)
+        const sortedExperiments = allExperiments.sort((a, b) => {
+          if (!a.createdAt) return 1;
+          if (!b.createdAt) return -1;
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        });
+        setExperiments(sortedExperiments);
         setLoading(false);
       } catch (err) {
         setError(
