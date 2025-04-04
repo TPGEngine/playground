@@ -4,13 +4,14 @@ import { db, Experiment } from "../data/db";
 import { useNavigate } from "react-router-dom";
 import { getEnvironmentById } from "../data/environments";
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 
-interface ExperimentWithDetails extends Experiment {
-  createdAt?: Date;
-}
+// No need for ExperimentWithDetails interface anymore since createdAt is part of Experiment
+type ExperimentDisplay = Experiment;
 
 const Experiments = () => {
-  const [experiments, setExperiments] = useState<ExperimentWithDetails[]>([]);
+  const [experiments, setExperiments] = useState<ExperimentDisplay[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const navigate = useNavigate();
@@ -23,12 +24,7 @@ const Experiments = () => {
     const fetchExperiments = async () => {
       try {
         const allExperiments = await db.experiments.toArray();
-        // Add mock data for demo purposes - you should replace this with real data
-        const experimentsWithDetails = allExperiments.map((exp) => ({
-          ...exp,
-          createdAt: new Date(Date.now() - Math.random() * 10000000000),
-        }));
-        setExperiments(experimentsWithDetails);
+        setExperiments(allExperiments);
         setLoading(false);
       } catch (err) {
         setError(
@@ -80,6 +76,30 @@ const Experiments = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
+          <div className="flex justify-end mb-6">
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                try {
+                  await db.experiments.clear();
+                  setExperiments([]);
+                  toast({
+                    title: "Success",
+                    description: "All experiments have been cleared",
+                  });
+                } catch (err) {
+                  toast({
+                    title: "Error",
+                    description: "Failed to clear experiments",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              Clear All Experiments
+            </Button>
+          </div>
+
           {loading ? (
             <div className="text-center">
               <p className="text-gray-500">Loading experiments...</p>

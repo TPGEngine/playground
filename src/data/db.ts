@@ -5,6 +5,7 @@ export interface Experiment {
   envId: number;
   seed?: number; // Optional field for the evolution seed
   pid?: number; // Optional field for the process ID
+  createdAt: Date; // Timestamp when the experiment was created
 }
 
 const db = new Dexie("ExperimentsDatabase") as Dexie & {

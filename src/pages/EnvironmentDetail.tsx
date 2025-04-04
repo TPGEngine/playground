@@ -45,10 +45,11 @@ const EnvironmentDetail = () => {
       // Generate a UUID for the experiment
       const experimentId = crypto.randomUUID();
 
-      // Add the experiment to the database with the UUID
+      // Add the experiment to the database with the UUID and creation date
       await db.experiments.add({
         id: experimentId,
         envId: parseInt(id!), // Convert string ID to number and ensure it exists
+        createdAt: new Date(), // Add creation timestamp
       });
 
       // Navigate to the evolution page with the UUID
