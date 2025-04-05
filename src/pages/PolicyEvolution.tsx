@@ -15,7 +15,6 @@ import { Separator } from "@/components/ui/separator";
 import { Environment, getEnvironmentById } from "@/data/environments";
 import { useToast } from "@/components/ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import LogPanel from "@/components/LogPanel";
 import VisualizationPanel from "@/components/VisualizationPanel";
 import { db } from "@/data/db";
 import { evolvePolicy, replayBestAgent } from "@/api";
