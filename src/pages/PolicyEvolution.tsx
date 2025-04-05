@@ -31,7 +31,8 @@ const PolicyEvolution = () => {
 
   // Evolution mutation
   const evolveMutation = useMutation({
-    mutationFn: evolvePolicy,
+    mutationFn: () =>
+      evolvePolicy(environment?.name.toLowerCase().replace(/\s+/g, "_") || ""),
     onSuccess: async (data) => {
       try {
         // Update the experiment in the database with seed and pid
@@ -70,7 +71,17 @@ const PolicyEvolution = () => {
 
   // Replay mutation
   const replayMutation = useMutation({
-    mutationFn: () => replayBestAgent(experimentId!),
+    mutationFn: async () => {
+      const experiment = await db.experiments
+        .where("id")
+        .equals(experimentId!)
+        .first();
+      const seed = experiment?.seed || 0;
+      return replayBestAgent(
+        environment?.name.toLowerCase().replace(/\s+/g, "_") || "",
+        seed
+      );
+    },
     onSuccess: () => {
       setIsReplaying(false);
     },
