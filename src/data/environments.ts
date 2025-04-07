@@ -10,15 +10,6 @@ export interface Environment {
 export const environments: Environment[] = [
   {
     id: 1,
-    name: "Ant",
-    image:
-      "https://images.ctfassets.net/kftzwdyauwt9/e0c0947f-1a44-4528-d23c194e7166/37f3c8cdb16c1866de4c33e8d9844d84/table-04.gif",
-    description:
-      "The Ant environment features a quadruped robot with the goal of learning to walk forward as fast as possible. This environment has a moderate action space and state space complexity, making it a good benchmark for reinforcement learning algorithms.",
-    complexity: "intermediate",
-  },
-  {
-    id: 2,
     name: "Half Cheetah",
     image:
       "https://gymnasium.farama.org/_static/videos/mujoco/half_cheetah.gif",
@@ -27,7 +18,7 @@ export const environments: Environment[] = [
     complexity: "intermediate",
   },
   {
-    id: 3,
+    id: 2,
     name: "Hopper",
     image: "https://gymnasium.farama.org/_static/videos/mujoco/hopper.gif",
     description:
@@ -35,7 +26,7 @@ export const environments: Environment[] = [
     complexity: "beginner",
   },
   {
-    id: 4,
+    id: 3,
     name: "Humanoid Standup",
     image:
       "https://gymnasium.farama.org/_static/videos/mujoco/humanoid_standup.gif",
@@ -44,7 +35,7 @@ export const environments: Environment[] = [
     complexity: "advanced",
   },
   {
-    id: 5,
+    id: 4,
     name: "Inverted Pendulum",
     image:
       "https://gymnasium.farama.org/_static/videos/mujoco/inverted_pendulum.gif",
@@ -53,12 +44,20 @@ export const environments: Environment[] = [
     complexity: "beginner",
   },
   {
-    id: 6,
+    id: 5,
     name: "Inverted Double Pendulum",
     image:
       "https://gymnasium.farama.org/_static/videos/mujoco/inverted_double_pendulum.gif",
     description:
       "The Inverted Double Pendulum extends the classic pendulum problem with two connected poles. The increased complexity makes it a more challenging control problem that requires sophisticated policies.",
+    complexity: "advanced",
+  },
+  {
+    id: 6,
+    name: "Multi-Task Agent",
+    image: "placeholder.svg",
+    description:
+      "The Multi-Task Agent tackles a diverse set of locomotion and control challenges by concurrently learning to balance the Inverted Pendulum, stabilize the complex Inverted Double Pendulum, and propel the Half Cheetah. This demanding multi-task setting necessitates the development of robust and adaptable policies that can generalize across distinct environments and tasks.",
     complexity: "advanced",
   },
 ];

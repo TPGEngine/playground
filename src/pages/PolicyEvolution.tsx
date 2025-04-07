@@ -31,7 +31,11 @@ const PolicyEvolution = () => {
   // Evolution mutation
   const evolveMutation = useMutation({
     mutationFn: () =>
-      evolvePolicy(environment?.name.toLowerCase().replace(/\s+/g, "_") || ""),
+      evolvePolicy(
+        environment?.name === "Multi-Task Agent"
+          ? "multitask_half_cheetah"
+          : environment?.name.toLowerCase().replace(/\s+/g, "_") || ""
+      ),
     onSuccess: async (data) => {
       try {
         // Update the experiment in the database with seed and pid
@@ -77,7 +81,9 @@ const PolicyEvolution = () => {
         .first();
       const seed = experiment?.seed || 0;
       return replayBestAgent(
-        environment?.name.toLowerCase().replace(/\s+/g, "_") || "",
+        environment?.name === "Multi-Task Agent"
+          ? "multitask_half_cheetah"
+          : environment?.name.toLowerCase().replace(/\s+/g, "_") || "",
         seed
       );
     },
