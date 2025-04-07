@@ -95,66 +95,54 @@ const EnvironmentDetail = () => {
             <span>Back to Environments</span>
           </Button>
         </div>
-
-        {/* Environment title */}
-        <motion.h1
-          className="text-3xl md:text-4xl font-bold mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          MuJoCo {environment.name}
-        </motion.h1>
-
-        {/* Environment preview */}
-        <motion.div
-          className="flex justify-center items-center mb-12 w-50 h-50"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <div className="rounded-xl overflow-hidden mx-auto max-w-52 w-full">
-            <img
-              src={environment.image}
-              alt={environment.name}
-              className="w-full h-auto object-contain"
-            />
-          </div>
-        </motion.div>
-
-        {/* Description section */}
-        <motion.div
-          className="mb-12 max-w-3xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-semibold mb-4">Description</h2>
-          <p className="text-gray-700 leading-relaxed">
-            {environment.description}
-          </p>
-
-          <div className="mt-6">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+        <div className="flex items-center justify-center min-h-[calc(80vh-6rem)] px-6">
+        <div className="w-full grid md:grid-cols-2 gap-10 max-w-5xl mx-auto items-start my-auto">
+          {/* Left Column */}
+          {/* Environment title */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-3xl md:text-4xl font-bold mb-12">
+              MuJoCo {environment.name}
+            </h1>
+  
+            <h2 className="text-xl font-semibold mb-2">Description</h2>
+            <p className="text-gray-700 leading-relaxed mb-4">
+              {environment.description}
+            </p>
+  
+            <span className="inline-block px-3 py-1 mb-6 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
               Complexity: {environment.complexity}
             </span>
-          </div>
-        </motion.div>
-
-        {/* CTA button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          <Button
-            className="px-8 py-6 rounded-md text-lg bg-tpg-blue hover:bg-tpg-blue/90 flex items-center gap-2"
-            onClick={handleEvolvePolicy}
+  
+            <Button
+              className="w-full sm:w-auto px-8 py-6 rounded-md text-lg bg-tpg-blue hover:bg-tpg-blue/90 flex items-center gap-2"
+              onClick={handleEvolvePolicy}
+            >
+              <Play className="h-5 w-5" />
+              <span>Evolve Policy</span>
+            </Button>
+          </motion.div>
+  
+          {/* Right Column (Image) */}
+          <motion.div
+            className="flex justify-center md:justify-end"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <Play className="h-5 w-5" />
-            <span>Evolve Policy</span>
-          </Button>
-        </motion.div>
+            <div className="rounded-xl overflow-hidden w-72 h-72 shadow-md bg-gray-100 flex items-center justify-center mt-6">
+              <img
+                src={environment.image}
+                alt={environment.name}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </div>
       </div>
     </motion.div>
   );
