@@ -55,7 +55,7 @@ export const environments: Environment[] = [
   {
     id: 6,
     name: "Multi-Task Agent",
-    image: "multitask.gif",
+    image: "/multitask.gif",
     description:
       "The Multi-Task Agent tackles a diverse set of locomotion and control challenges by concurrently learning to balance the Inverted Pendulum, stabilize the complex Inverted Double Pendulum, and propel the Half Cheetah. This demanding multi-task setting necessitates the development of robust and adaptable policies that can generalize across distinct environments and tasks.",
     complexity: "advanced",
